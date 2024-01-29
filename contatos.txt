@@ -1,5 +1,4 @@
-
-0|ronaldo|fenomemno
-1|luiz|boboro
-0|eu|bobo
-1|oila|ele
+0|Luiz|Bonotto
+1|Luiz|Gabriel
+0|eu|bonotto
+1|eu|denovo

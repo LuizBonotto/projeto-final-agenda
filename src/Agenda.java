@@ -56,7 +56,24 @@ public class Agenda {
     public void imprimirContatos() {
         for (Map.Entry<Long, Contato> entry : contatos.entrySet()) {
             Contato contato = entry.getValue();
-            System.out.println(contato.getId() + " | " + contato.getNome() + " " + contato.getSobreNome());
+            if (contato != null && (contato.getNome() != null && !contato.getNome().isEmpty()) ||
+                    (contato.getSobreNome() != null && !contato.getSobreNome().isEmpty())) {
+                System.out.println(contato.getId() + " | " + (contato.getNome() + " " + contato.getSobreNome()).trim());
+            }
+        }
+    }
+
+    public void carregarContatos() {
+        List<Contato> contatosDoArquivo = Arquivos.lerContatos();
+        for (Contato contato : contatosDoArquivo) {
+            contatos.put(contato.getId(), contato);
+        }
+    }
+
+    public void carregarTelefones() {
+        List<Telefone> telefonesDoArquivo = Arquivos.lerTelefones();
+        for (Telefone telefone : telefonesDoArquivo) {
+            telefones.put(telefone.getId(), telefone);
         }
     }
 }

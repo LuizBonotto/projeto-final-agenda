@@ -28,6 +28,7 @@ public class Arquivos {
         }
     }
 
+
     public static void apagarArquivos() {
         File arquivoTelefone = new File(NOME_ARQUIVO_TELEFONE);
         File arquivoContato = new File(NOME_ARQUIVO_CONTATO);
@@ -42,31 +43,61 @@ public class Arquivos {
     }
 
     public static void escreverTelefone(Telefone telefone) {
-        File arquivoTelefone = new File(NOME_ARQUIVO_TELEFONE);
+        if (telefone != null && telefone.getDdd() != null && telefone.getNumero() != null) {
+            File arquivoTelefone = new File(NOME_ARQUIVO_TELEFONE);
 
-        try {
-            String linha = String.format("%d%s%s%s%d", telefone.getId(), SEPARADOR, telefone.getDdd(), SEPARADOR, telefone.getNumero());
-            FileWriter fileWriter = new FileWriter(arquivoTelefone, true);
-            BufferedWriter bw = new BufferedWriter(fileWriter);
-            bw.newLine();
-            bw.write(linha);
-            bw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            try {
+                String linha = String.format("%d%s%s%s%d", telefone.getId(), SEPARADOR, telefone.getDdd(), SEPARADOR, telefone.getNumero());
+                FileWriter fileWriter = new FileWriter(arquivoTelefone, true);
+                BufferedWriter bw = new BufferedWriter(fileWriter);
+                bw.newLine();
+                bw.write(linha);
+                bw.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public static void escreverContato(Contato contato) {
+        if (contato != null && contato.getNome() != null && contato.getSobreNome() != null && contato.getId() != null) {
+            File arquivoContato = new File(NOME_ARQUIVO_CONTATO);
+
+            try {
+                String linha = String.format("%d%s%s%s%s", contato.getId(), SEPARADOR, contato.getNome(), SEPARADOR, contato.getSobreNome());
+                FileWriter fileWriter = new FileWriter(arquivoContato, true);
+                BufferedWriter bw = new BufferedWriter(fileWriter);
+                bw.newLine();
+                bw.write(linha);
+                bw.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
+    public static List<Contato> lerContatos() {
         File arquivoContato = new File(NOME_ARQUIVO_CONTATO);
+        List<Contato> contatos = new ArrayList<>();
 
         try {
-            String linha = String.format("%d%s%s%s%s", contato.getId(), SEPARADOR, contato.getNome(), SEPARADOR, contato.getSobreNome());
-            FileWriter fileWriter = new FileWriter(arquivoContato, true);
-            BufferedWriter bw = new BufferedWriter(fileWriter);
-            bw.newLine();
-            bw.write(linha);
-            bw.close();
-        } catch (IOException e) {
+            Scanner scanner = new Scanner(arquivoContato);
+            while (scanner.hasNext()) {
+                String[] dadosContato = scanner.nextLine().split(SEPARADOR);
+
+                // Adicione essa verificação para evitar strings vazias ou mal formatadas
+                if (dadosContato.length >= 3 && !dadosContato[0].isEmpty()) {
+                    Contato contato = new Contato();
+                    contato.setId(Long.parseLong(dadosContato[0]));
+                    contato.setNome(dadosContato[1]);
+                    contato.setSobreNome(dadosContato[2]);
+                    contatos.add(contato);
+                }
+            }
+            scanner.close();
+            return contatos;
+        } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -79,32 +110,15 @@ public class Arquivos {
             Scanner scanner = new Scanner(arquivoTelefone);
             while (scanner.hasNext()) {
                 String[] dadosTelefone = scanner.nextLine().split(SEPARADOR);
-                Telefone telefone = new Telefone(Long.parseLong(dadosTelefone[0]), dadosTelefone[1], Long.parseLong(dadosTelefone[2]));
-                telefones.add(telefone);
+
+                // Adicione essa verificação para evitar strings vazias ou mal formatadas
+                if (dadosTelefone.length >= 3 && !dadosTelefone[0].isEmpty()) {
+                    Telefone telefone = new Telefone(Long.parseLong(dadosTelefone[0]), dadosTelefone[1], Long.parseLong(dadosTelefone[2]));
+                    telefones.add(telefone);
+                }
             }
             scanner.close();
             return telefones;
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static List<Contato> lerContatos() {
-        File arquivoContato = new File(NOME_ARQUIVO_CONTATO);
-        List<Contato> contatos = new ArrayList<>();
-
-        try {
-            Scanner scanner = new Scanner(arquivoContato);
-            while (scanner.hasNext()) {
-                String[] dadosContato = scanner.nextLine().split(SEPARADOR);
-                Contato contato = new Contato();
-                if (!dadosContato[0].isEmpty()) contato.setId(Long.parseLong(dadosContato[0]));
-                contato.setNome(dadosContato[1]);
-                contato.setSobreNome(dadosContato[2]);
-                contatos.add(contato);
-            }
-            scanner.close();
-            return contatos;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

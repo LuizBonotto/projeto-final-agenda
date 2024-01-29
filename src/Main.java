@@ -5,6 +5,9 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Agenda agenda = new Agenda();
 
+        agenda.carregarContatos();
+        agenda.carregarTelefones();
+
         while (true) {
             System.out.println("##################");
             System.out.println("##### AGENDA #####");

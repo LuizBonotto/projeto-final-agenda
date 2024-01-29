@@ -15,7 +15,7 @@ public class Contato {
     }
 
     public String getNome() {
-        return nome;
+        return nome != null ? nome : "";
     }
 
     public String getSobreNome() {
