@@ -1,0 +1,5 @@
+
+0|ronaldo|fenomemno
+1|luiz|boboro
+0|eu|bobo
+1|oila|ele
