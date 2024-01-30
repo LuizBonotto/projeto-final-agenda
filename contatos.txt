@@ -1,4 +1,0 @@
-0|Luiz|Bonotto
-1|Luiz|Gabriel
-0|eu|bonotto
-1|eu|denovo
