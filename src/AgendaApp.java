@@ -63,6 +63,12 @@ public class AgendaApp {
         System.out.print("Digite o sobrenome do contato: ");
         String sobreNome = scanner.nextLine();
 
+        // Verifica se o nome/sobrenome já existe
+        if (contatoJaExiste(nome, sobreNome)) {
+            System.out.println("O contato com o mesmo nome e sobrenome já existe.");
+            return;
+        }
+
         Contato novoContato = new Contato();
         novoContato.setId(proximoId++);
         novoContato.setNome(nome);
@@ -79,9 +85,16 @@ public class AgendaApp {
             System.out.print("Digite o DDD do telefone " + (i + 1) + ": ");
             String ddd = scanner.nextLine();
 
+            // Verifica se o telefone com o mesmo DDD já existe
+
             System.out.print("Digite o número do telefone " + (i + 1) + ": ");
             Long numero = scanner.nextLong();
             scanner.nextLine(); // Consumir a quebra de linha
+
+            if (telefoneJaExiste(ddd, numero)) {
+                System.out.println("O telefone com o mesmo DDD já existe em outro contato.");
+                return;
+            }
 
             Telefone telefone = new Telefone(1L, "DDD", 123456789L);
             telefone.setId(novoContato.getId());
@@ -95,6 +108,21 @@ public class AgendaApp {
         System.out.println("Contato adicionado com sucesso!");
         salvarContatos();
     }
+
+    // Função auxiliar para verificar se um contato com o mesmo nome/sobrenome já existe
+    private static boolean contatoJaExiste(String nome, String sobreNome) {
+        return contatos.stream()
+                .anyMatch(contato -> contato.getNome().equalsIgnoreCase(nome)
+                        && contato.getSobreNome().equalsIgnoreCase(sobreNome));
+    }
+
+    // Função auxiliar para verificar se um telefone com o mesmo DDD já existe
+    private static boolean telefoneJaExiste(String ddd, Long numero) {
+        return contatos.stream()
+                .flatMap(contato -> contato.getTelefones().stream())
+                .anyMatch(telefone -> telefone.getDdd().equalsIgnoreCase(ddd) && telefone.getNumero().equals(numero));
+    }
+
 
 
 
@@ -142,7 +170,7 @@ public class AgendaApp {
                         scanner.nextLine(); // Consumir a quebra de linha
 
                         Telefone telefone = new Telefone(1L, "DDD", 123456789L);
-                        telefone.setId(contato.getId());
+                        telefone.setId(idEditar);
                         telefone.setDdd(ddd);
                         telefone.setNumero(numero);
 
@@ -174,19 +202,26 @@ public class AgendaApp {
             while ((linhaContatos = brContatos.readLine()) != null) {
                 String[] dadosContatos = linhaContatos.split("\\|");
 
-                Contato contato = new Contato();
-                contato.setId(Long.parseLong(dadosContatos[0].trim()));
-                contato.setNome(dadosContatos[1].trim());
-                contato.setSobreNome(dadosContatos[2].trim());
+                Long idContato = Long.parseLong(dadosContatos[0].trim());
+                String nome = dadosContatos[1].trim();
+                String sobreNome = dadosContatos[2].trim();
 
-                // Inicialize a lista de telefones para o contato
-                contato.setTelefones(new ArrayList<>());
+                // Verifica se o contato já existe antes de adicioná-lo à lista
+                if (!contatoJaExiste(nome, sobreNome)) {
+                    Contato contato = new Contato();
+                    contato.setId(idContato);
+                    contato.setNome(nome);
+                    contato.setSobreNome(sobreNome);
 
-                // Adicione o contato ao mapa temporário
-                telefonesPorContato.put(contato.getId(), new ArrayList<>());
+                    // Inicialize a lista de telefones para o contato
+                    contato.setTelefones(new ArrayList<>());
 
-                // Adicione o contato à lista de contatos
-                contatos.add(contato);
+                    // Adicione o contato ao mapa temporário
+                    telefonesPorContato.put(idContato, new ArrayList<>());
+
+                    // Adicione o contato à lista de contatos
+                    contatos.add(contato);
+                }
             }
 
             // Carregar dados do arquivo de telefones
@@ -203,8 +238,11 @@ public class AgendaApp {
                     String ddd = dadosTelefones[2].trim();
                     Long numero = Long.parseLong(dadosTelefones[3].trim());
 
-                    // Adicione o telefone ao mapa temporário
-                    telefonesPorContato.get(idContato).add(new Telefone(idTelefone, ddd, numero));
+                    // Verifica se a combinação DDD e número já existe antes de adicioná-lo ao mapa
+                    String chaveDddNumero = ddd + "-" + numero;
+                    if (!telefoneJaExiste(ddd, numero)) {
+                        telefonesPorContato.get(idContato).add(new Telefone(idTelefone, ddd, numero));
+                    }
                 } else {
                     System.err.println("Linha do arquivo de telefones malformatada: " + linhaTelefones);
                 }
@@ -222,6 +260,7 @@ public class AgendaApp {
             System.err.println("Erro ao carregar contatos do arquivo: " + e.getMessage());
         }
     }
+
 
 
 
